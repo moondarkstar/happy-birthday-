@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>生日快乐 - 周想</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+            overflow: hidden;
+            background: #0a0a14;
+            font-family: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans SC', sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            position: relative;
+        }
+        .stars-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .star {
+            position: absolute;
+            border-radius: 50%;
+            background: white;
+            animation: twinkle var(--twinkle-dur) ease-in-out infinite;
+            animation-delay: var(--twinkle-delay);
+            opacity: 0;
+        }
+        @keyframes twinkle {
+            0%,
+            100% {
+                opacity: 0.2;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.9;
+                transform: scale(1.8);
+            }
+        }
+        #fireworkCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+        .incoming-call {
+            position: fixed;
+            top: 24px;
+            left: 24px;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            background: rgba(20, 20, 35, 0.92);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1.5px solid rgba(255, 255, 255, 0.18);
+            border-radius: 22px;
+            padding: 14px 20px 14px 16px;
+            cursor: pointer;
+            box-shadow: 0 8px 32px rgba(168, 127, 250, 0.25), 0 2px 8px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: callPulse 1.6s ease-in-out infinite, callGlow 2.4s ease-in-out infinite;
+            min-width: 180px;
+        }
+        .incoming-call:hover {
+            transform: scale(1.04);
+            border-color: rgba(216, 180, 254, 0.6);
+            box-shadow: 0 12px 40px rgba(168, 127, 250, 0.45), 0 4px 16px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        }
+        .incoming-call:active {
+            transform: scale(0.96);
+            transition: all 0.1s ease;
+        }
+        .incoming-call.picked-up {
+            animation: pickUpBurst 0.5s ease-out forwards;
+            pointer-events: none;
+        }
+        @keyframes callPulse {
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+            15% {
+                transform: translateY(-6px);
+            }
+            30% {
+                transform: translateY(0);
+            }
+            45% {
+                transform: translateY(-4px);
+            }
+            60% {
+                transform: translateY(0);
+            }
+            75% {
+                transform: translateY(-2px);
+            }
+            90% {
+                transform: translateY(0);
+            }
+        }
+        @keyframes callGlow {
+            0%,
+            100% {
+                box-shadow: 0 8px 32px rgba(168, 127, 250, 0.25), 0 2px 8px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            }
+            50% {
+                box-shadow: 0 8px 40px rgba(192, 132, 252, 0.5), 0 4px 20px rgba(168, 127, 250, 0.35), 0 2px 8px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            }
+        }
+        @keyframes pickUpBurst {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+                filter: brightness(1);
+            }
+            30% {
+                transform: scale(1.15);
+                opacity: 1;
+                filter: brightness(2);
+            }
+            100% {
+                transform: scale(1.4);
+                opacity: 0;
+                filter: brightness(3);
+            }
+        }
+        .call-icon-wrapper {
+            position: relative;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4ade80, #22c55e);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            animation: iconPulse 1.2s ease-in-out infinite;
+            box-shadow: 0 0 20px rgba(74, 222, 128, 0.5), 0 0 40px rgba(34, 197, 94, 0.25);
+        }
+        @keyframes iconPulse {
+            0%,
+            100% {
+                box-shadow: 0 0 20px rgba(74, 222, 128, 0.5), 0 0 40px rgba(34, 197, 94, 0.25);
+            }
+            50% {
+                box-shadow: 0 0 32px rgba(74, 222, 128, 0.75), 0 0 60px rgba(34, 197, 94, 0.45), 0 0 80px rgba(168, 127, 250, 0.2);
+            }
+        }
+        .call-icon-svg {
+            width: 20px;
+            height: 20px;
+            fill: white;
+            animation: phoneShake 0.6s ease-in-out infinite;
+        }
+        @keyframes phoneShake {
+            0%,
+            100% {
+                transform: rotate(0);
+            }
+            20% {
+                transform: rotate(-8deg);
+            }
+            40% {
+                transform: rotate(8deg);
+            }
+            60% {
+                transform: rotate(-5deg);
+            }
+            80% {
+                transform: rotate(5deg);
+            }
+        }
+        .call-info {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            min-width: 100px;
+        }
+        .call-name {
+            font-size: 17px;
+            font-weight: 700;
+            color: #f0e6ff;
+            letter-spacing: 0.5px;
+            line-height: 1.2;
+        }
+        .call-label {
+            font-size: 12px;
+            font-weight: 500;
+            color: #c4b5fd;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .call-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #4ade80;
+            animation: dotBlink 0.8s ease-in-out infinite;
+        }
+        @keyframes dotBlink {
+            0%,
+            100% {
+                opacity: 1;
+                box-shadow: 0 0 6px #4ade80;
+            }
+            50% {
+                opacity: 0.3;
+                box-shadow: 0 0 2px #4ade80;
+            }
+        }
+        .swipe-hint {
+            position: absolute;
+            bottom: -28px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.55);
+            letter-spacing: 1.5px;
+            white-space: nowrap;
+            animation: hintFade 2s ease-in-out infinite;
+            pointer-events: none;
+        }
+        @keyframes hintFade {
+            0%,
+            100% {
+                opacity: 0.4;
+            }
+            50% {
+                opacity: 0.9;
+            }
+        }
+        @media (max-width: 480px) {
+            .incoming-call {
+                top: 16px;
+                left: 12px;
+                padding: 10px 14px 10px 12px;
+                gap: 10px;
+                border-radius: 18px;
+            }
+            .call-icon-wrapper {
+                width: 36px;
+                height: 36px;
+            }
+            .call-icon-svg {
+                width: 16px;
+                height: 16px;
+            }
+            .call-name {
+                font-size: 15px;
+            }
+            .call-label {
+                font-size: 10px;
+            }
+            .swipe-hint {
+                bottom: -24px;
+                font-size: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="stars-container" id="starsContainer"></div>
+    <canvas id="fireworkCanvas"></canvas>
+    <div class="incoming-call" id="incomingCall" title="点击接听 📞">
+        <div class="call-icon-wrapper">
+            <svg class="call-icon-svg" viewBox="0 0 24 24">
+                <path d="M6.62 10.79a15.05 15.05 0 006.59 6.59l2.2-2.2a1 1 0 011.01-.24c1.12.37 2.33.57 3.58.57a1 1 0 011 1V20a1 1 0 01-1 1A17 17 0 013 4a1 1 0 011-1h3.5a1 1 0 011 1c0 1.25.2 2.46.57 3.58a1 1 0 01-.25 1.01l-2.2 2.2z"/>
+            </svg>
+        </div>
+        <div class="call-info">
+            <span class="call-name">赖晓曼</span>
+            <span class="call-label"><span class="call-dot"></span> 来电中...</span>
+        </div>
+        <div class="swipe-hint">👆 点击接听</div>
+    </div>
+    <script>
+        (function() {
+            const canvas = document.getElementById('fireworkCanvas');
+            const ctx = canvas.getContext('2d');
+            const incomingCall = document.getElementById('incomingCall');
+            const starsContainer = document.getElementById('starsContainer');
+            let W, H;
+
+            function resizeCanvas() {
+                W = canvas.width = window.innerWidth;
+                H = canvas.height = window.innerHeight;
+            }
+            resizeCanvas();
+            window.addEventListener('resize', () => {
+                resizeCanvas();
+                createStars();
+            });
+
+            function createStars() {
+                starsContainer.innerHTML = '';
+                const count = Math.floor((W * H) / 2200);
+                for (let i = 0; i < count; i++) {
+                    const star = document.createElement('div');
+                    star.classList.add('star');
+                    const size = Math.random() * 2.2 + 0.6;
+                    star.style.cssText = `width:${size}px;height:${size}px;left:${Math.random()*100}%;top:${Math.random()*100}%;--twinkle-dur:${Math.random()*3+2}s;--twinkle-delay:${Math.random()*4}s;box-shadow:0 0 ${size*2}px rgba(255,255,255,0.6);`;
+                    starsContainer.appendChild(star);
+                }
+            }
+            createStars();
+
+            const particles = [];
+            const textEffects = [];
+
+            class Particle {
+                constructor(x, y, vx, vy, color, size, life, glow = false, trail = false) {
+                    this.x = x;
+                    this.y = y;
+                    this.vx = vx;
+                    this.vy = vy;
+                    this.color = color;
+                    this.size = size;
+                    this.life = life;
+                    this.maxLife = life;
+                    this.glow = glow;
+                    this.trail = trail;
+                    this.trailPoints = [];
+                }
+                update(dt) {
+                    this.trailPoints.push({ x: this.x, y: this.y, life: 0.25 });
+                    if (this.trailPoints.length > 6) this.trailPoints.shift();
+                    this.trailPoints.forEach(t => t.life -= dt * 3.5);
+                    this.x += this.vx * dt;
+                    this.y += this.vy * dt;
+                    this.vy += 180 * dt;
+                    this.vx *= 0.995;
+                    this.vy *= 0.995;
+                    this.life -= dt;
+                    this.size *= 0.998;
+                }
+                get alpha() { return Math.max(0, this.life / this.maxLife); }
+                get alive() { return this.life > 0 && this.size > 0.15; }
+                draw(ctx) {
+                    const alpha = this.alpha;
+                    if (this.trail && this.trailPoints.length > 1) {
+                        for (let i = 1; i < this.trailPoints.length; i++) {
+                            const t = this.trailPoints[i];
+                            if (t.life <= 0) continue;
+                            const trailAlpha = t.life * alpha * 0.5;
+                            ctx.beginPath();
+                            ctx.moveTo(this.trailPoints[i - 1].x, this.trailPoints[i - 1].y);
+                            ctx.lineTo(t.x, t.y);
+                            ctx.strokeStyle = this.color.replace('1)', `${trailAlpha})`).replace('rgb', 'rgba');
+                            ctx.lineWidth = this.size * 0.6;
+                            ctx.lineCap = 'round';
+                            ctx.stroke();
+                        }
+                    }
+                    ctx.save();
+                    ctx.globalAlpha = alpha;
+                    if (this.glow) {
+                        ctx.shadowColor = this.color;
+                        ctx.shadowBlur = this.size * 4;
+                    }
+                    ctx.fillStyle = this.color;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fill();
+                    if (this.size > 2) {
+                        ctx.fillStyle = 'rgba(255,255,255,0.7)';
+                        ctx.beginPath();
+                        ctx.arc(this.x, this.y, this.size * 0.35, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                    ctx.restore();
+                }
+            }
+
+            class TextEffect {
+                constructor(x, y, text) {
+                    this.x = x;
+                    this.y = y;
+                    this.text = text;
+                    this.life = 2.2;
+                    this.maxLife = 2.2;
+                    this.scale = 0.3;
+                    this.targetScale = 1;
+                    this.floatOffset = 0;
+                    this.sparkleParticles = [];
+                    for (let i = 0; i < 40; i++) {
+                        const angle = Math.random() * Math.PI * 2;
+                        const dist = 30 + Math.random() * 80;
+                        const sp = {
+                            x: this.x + Math.cos(angle) * dist,
+                            y: this.y + Math.sin(angle) * dist,
+                            ox: Math.cos(angle) * dist,
+                            oy: Math.sin(angle) * dist,
+                            size: Math.random() * 3 + 1,
+                            life: 0.7 + Math.random() * 1.3,
+                            maxLife: 0.7 + Math.random() * 1.3,
+                            color: Math.random() < 0.5 ? `hsl(${270+Math.random()*30},${70+Math.random()*30}%,${65+Math.random()*30}%)` : `hsl(${320+Math.random()*30},${60+Math.random()*40}%,${70+Math.random()*25}%)`,
+                            phase: Math.random() * Math.PI * 2,
+                            speed: 1.5 + Math.random() * 3,
+                        };
+                        this.sparkleParticles.push(sp);
+                    }
+                }
+                update(dt) {
+                    this.life -= dt;
+                    if (this.scale < this.targetScale) this.scale += (this.targetScale - this.scale) * 8 * dt;
+                    this.floatOffset = Math.sin(this.life * 3) * 8;
+                    this.sparkleParticles.forEach(sp => {
+                        sp.life -= dt * 0.9;
+                        sp.x = this.x + sp.ox + Math.cos(sp.phase + this.life * 5) * 15;
+                        sp.y = this.y + sp.oy + Math.sin(sp.phase + this.life * 4) * 15 + this.floatOffset;
+                        sp.size *= 0.997;
+                    });
+                    this.sparkleParticles = this.sparkleParticles.filter(sp => sp.life > 0);
+                }
+                get alpha() {
+                    if (this.life > 1.6) return Math.min(1, (this.maxLife - this.life) / 0.6);
+                    if (this.life < 0.5) return this.life / 0.5;
+                    return 1;
+                }
+                get alive() { return this.life > 0; }
+                draw(ctx) {
+                    if (this.alpha <= 0.02) return;
+                    const alpha = this.alpha;
+                    const drawY = this.y + this.floatOffset;
+                    ctx.save();
+                    ctx.globalAlpha = alpha;
+                    const outerGlow = ctx.createRadialGradient(this.x, drawY, 10, this.x, drawY, 140);
+                    outerGlow.addColorStop(0, 'rgba(216,180,254,0.6)');
+                    outerGlow.addColorStop(0.4, 'rgba(192,132,252,0.3)');
+                    outerGlow.addColorStop(0.7, 'rgba(167,139,250,0.08)');
+                    outerGlow.addColorStop(1, 'rgba(167,139,250,0)');
+                    ctx.fillStyle = outerGlow;
+                    ctx.beginPath();
+                    ctx.arc(this.x, drawY, 140, 0, Math.PI * 2);
+                    ctx.fill();
+                    const midGlow = ctx.createRadialGradient(this.x, drawY, 2, this.x, drawY, 60);
+                    midGlow.addColorStop(0, 'rgba(240,171,252,0.7)');
+                    midGlow.addColorStop(0.5, 'rgba(196,181,253,0.35)');
+                    midGlow.addColorStop(1, 'rgba(216,180,254,0)');
+                    ctx.fillStyle = midGlow;
+                    ctx.beginPath();
+                    ctx.arc(this.x, drawY, 60, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.shadowColor = 'rgba(192,132,252,0.8)';
+                    ctx.shadowBlur = 25;
+                    const textGrad = ctx.createLinearGradient(this.x - 100, drawY - 20, this.x + 100, drawY + 20);
+                    textGrad.addColorStop(0, '#f0abfc');
+                    textGrad.addColorStop(0.25, '#e9d5ff');
+                    textGrad.addColorStop(0.5, '#d8b4fe');
+                    textGrad.addColorStop(0.75, '#c4b5fd');
+                    textGrad.addColorStop(1, '#f0abfc');
+                    ctx.fillStyle = textGrad;
+                    const fontSize = Math.max(18, Math.min(38, W / 14));
+                    ctx.font = `bold ${fontSize * this.scale}px "PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans SC",sans-serif`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(this.text, this.x, drawY);
+                    ctx.shadowColor = 'rgba(255,255,255,0.5)';
+                    ctx.shadowBlur = 8;
+                    const overlayGrad = ctx.createLinearGradient(this.x - 80, drawY - 15, this.x + 80, drawY + 15);
+                    overlayGrad.addColorStop(0, 'rgba(255,255,255,0.25)');
+                    overlayGrad.addColorStop(0.5, 'rgba(255,240,255,0.4)');
+                    overlayGrad.addColorStop(1, 'rgba(255,255,255,0.2)');
+                    ctx.fillStyle = overlayGrad;
+                    ctx.fillText(this.text, this.x, drawY);
+                    ctx.restore();
+                    this.sparkleParticles.forEach(sp => {
+                        const spAlpha = Math.max(0, sp.life / sp.maxLife) * alpha;
+                        if (spAlpha <= 0.02) return;
+                        ctx.save();
+                        ctx.globalAlpha = spAlpha;
+                        ctx.shadowColor = sp.color;
+                        ctx.shadowBlur = sp.size * 3;
+                        ctx.fillStyle = sp.color;
+                        ctx.beginPath();
+                        ctx.arc(sp.x, sp.y, sp.size, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.strokeStyle = `rgba(255,255,255,${spAlpha*0.6})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.beginPath();
+                        ctx.moveTo(sp.x - sp.size * 2, sp.y);
+                        ctx.lineTo(sp.x + sp.size * 2, sp.y);
+                        ctx.moveTo(sp.x, sp.y - sp.size * 2);
+                        ctx.lineTo(sp.x, sp.y + sp.size * 2);
+                        ctx.stroke();
+                        ctx.restore();
+                    });
+                }
+            }
+
+            class Rocket {
+                constructor(startX, startY, targetX, targetY, color, hasText = false) {
+                    this.x = startX;
+                    this.y = startY;
+                    this.targetX = targetX;
+                    this.targetY = targetY;
+                    this.color = color;
+                    this.hasText = hasText;
+                    this.speed = 380 + Math.random() * 250;
+                    this.trail = [];
+                    this.alive = true;
+                    this.distToTarget = Math.hypot(targetX - startX, targetY - startY);
+                    this.totalDist = this.distToTarget;
+                }
+                update(dt) {
+                    const dx = this.targetX - this.x;
+                    const dy = this.targetY - this.y;
+                    const dist = Math.hypot(dx, dy);
+                    if (dist < 8 || this.distToTarget <= 0) {
+                        this.alive = false;
+                        this.x = this.targetX;
+                        this.y = this.targetY;
+                        return;
+                    }
+                    const moveX = (dx / dist) * this.speed * dt;
+                    const moveY = (dy / dist) * this.speed * dt;
+                    this.x += moveX;
+                    this.y += moveY;
+                    this.distToTarget -= Math.hypot(moveX, moveY);
+                    this.trail.push({ x: this.x, y: this.y, life: 0.35, size: 2 + Math.random() * 2.5 });
+                    if (this.trail.length > 18) this.trail.shift();
+                    this.trail.forEach(t => t.life -= dt * 2.5);
+                    this.trail = this.trail.filter(t => t.life > 0);
+                }
+                draw(ctx) {
+                    this.trail.forEach(t => {
+                        const alpha = t.life / 0.35;
+                        ctx.save();
+                        ctx.globalAlpha = alpha * 0.7;
+                        ctx.fillStyle = this.color;
+                        ctx.shadowColor = this.color;
+                        ctx.shadowBlur = t.size * 2;
+                        ctx.beginPath();
+                        ctx.arc(t.x, t.y, t.size, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.restore();
+                    });
+                    ctx.save();
+                    ctx.fillStyle = '#ffffff';
+                    ctx.shadowColor = this.color;
+                    ctx.shadowBlur = 14;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, 3.5, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = this.color;
+                    ctx.shadowBlur = 8;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, 2.5, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                }
+            }
+
+            let rockets = [];
+            let isFiring = false;
+            let fireworkQueue = [];
+            let callCardVisible = true;
+            let fireworkTimeoutId = null;
+            let animationId = null;
+            let lastTime = performance.now();
+            let fireworkShowStartTime = 0;
+
+            const purplePalettes = [
+                ['#d8b4fe', '#c084fc', '#e9d5ff', '#f0abfc', '#c4b5fd', '#a78bfa'],
+                ['#e9d5ff', '#d8b4fe', '#f5d0fe', '#ddd6fe', '#c084fc', '#f0abfc'],
+                ['#f0abfc', '#d8b4fe', '#c4b5fd', '#e9d5ff', '#a78bfa', '#fbcfe8'],
+            ];
+            const allColors = [
+                '#d8b4fe', '#c084fc', '#e9d5ff', '#f0abfc', '#c4b5fd', '#a78bfa',
+                '#fbcfe8', '#f9a8d4', '#fde68a', '#fcd34d', '#ffffff', '#fef3c7',
+                '#bfdbfe', '#bbf7d0', '#fecaca', '#fed7aa', '#e0e7ff', '#fce7f3',
+                '#ffd700', '#ffb3d9', '#b8c6ff', '#d4f0ff',
+            ];
+
+            function getRandomPaletteColors(count) {
+                const palette = purplePalettes[Math.floor(Math.random() * purplePalettes.length)];
+                const colors = [];
+                for (let i = 0; i < count; i++) {
+                    if (Math.random() < 0.5) colors.push(palette[Math.floor(Math.random() * palette.length)]);
+                    else colors.push(allColors[Math.floor(Math.random() * allColors.length)]);
+                }
+                return colors;
+            }
+
+            function getLavenderColor() {
+                return `hsl(${265+Math.random()*25},${55+Math.random()*40}%,${65+Math.random()*28}%)`;
+            }
+
+            function explodeAt(x, y, hasText = false) {
+                const particleCount = hasText ? 140 + Math.floor(Math.random() * 60) : 80 + Math.floor(Math.random() * 50);
+                const colors = getRandomPaletteColors(particleCount);
+                for (let i = 0; i < particleCount; i++) {
+                    const angle = Math.random() * Math.PI * 2;
+                    const speed = (80 + Math.random() * 320) * (hasText ? 1.15 : 1);
+                    particles.push(new Particle(x, y, Math.cos(angle) * speed, Math.sin(angle) * speed, colors[i % colors.length], 1.5 + Math.random() * 4.5, 1.2 + Math.random() * 2.2, Math.random() < 0.35, Math.random() < 0.3));
+                }
+                for (let i = 0; i < 20; i++) {
+                    const angle = Math.random() * Math.PI * 2;
+                    const speed = 15 + Math.random() * 60;
+                    particles.push(new Particle(x, y, Math.cos(angle) * speed, Math.sin(angle) * speed, '#ffffff', 1 + Math.random() * 2.5, 0.3 + Math.random() * 0.7, true, false));
+                }
+                if (hasText) textEffects.push(new TextEffect(x, y - 5, '祝周想生日快乐'));
+            }
+
+            function launchFirework(hasText = false) {
+                const startX = W * 0.15 + Math.random() * W * 0.7;
+                const startY = H + 30;
+                const targetX = W * 0.1 + Math.random() * W * 0.8;
+                const targetY = H * 0.12 + Math.random() * H * 0.45;
+                rockets.push(new Rocket(startX, startY, targetX, targetY, getLavenderColor(), hasText));
+            }
+
+            function startFireworkShow() {
+                if (isFiring) return;
+                isFiring = true;
+                fireworkQueue = [];
+                rockets = [];
+                const totalFireworks = 12 + Math.floor(Math.random() * 8);
+                const textFireworkIndices = new Set();
+                const targetTextCount = Math.max(2, Math.floor(totalFireworks * 0.3));
+                while (textFireworkIndices.size < targetTextCount) textFireworkIndices.add(Math.floor(Math.random() * totalFireworks));
+                for (let i = 0; i < totalFireworks; i++) {
+                    fireworkQueue.push({ delay: i * 0.28 + Math.random() * 0.35, hasText: textFireworkIndices.has(i), launched: false });
+                }
+                fireworkQueue.sort((a, b) => a.delay - b.delay);
+                const totalDuration = fireworkQueue[fireworkQueue.length - 1].delay + 2.5;
+                if (fireworkTimeoutId) clearTimeout(fireworkTimeoutId);
+                fireworkTimeoutId = setTimeout(() => {
+                    isFiring = false;
+                    setTimeout(() => showCallCard(), 2500);
+                }, totalDuration * 1000 + 500);
+                fireworkShowStartTime = performance.now();
+            }
+
+            function showCallCard() {
+                callCardVisible = true;
+                incomingCall.classList.remove('picked-up');
+                incomingCall.style.display = 'flex';
+                incomingCall.style.pointerEvents = 'auto';
+                void incomingCall.offsetWidth;
+                incomingCall.style.animation = 'callPulse 1.6s ease-in-out infinite, callGlow 2.4s ease-in-out infinite';
+            }
+
+            function hideCallCard() {
+                callCardVisible = false;
+                incomingCall.classList.add('picked-up');
+                setTimeout(() => { if (!callCardVisible) incomingCall.style.display = 'none'; }, 500);
+            }
+
+            incomingCall.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (!callCardVisible || isFiring) return;
+                hideCallCard();
+                setTimeout(startFireworkShow, 300);
+            });
+            incomingCall.addEventListener('touchend', (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                if (!callCardVisible || isFiring) return;
+                hideCallCard();
+                setTimeout(startFireworkShow, 300);
+            });
+            document.addEventListener('click', (e) => {
+                if (!callCardVisible || isFiring) return;
+                if (e.target.closest('.incoming-call')) return;
+                hideCallCard();
+                setTimeout(startFireworkShow, 300);
+            });
+
+            function animate(timestamp) {
+                animationId = requestAnimationFrame(animate);
+                let dt = (timestamp - lastTime) / 1000;
+                if (dt <= 0) dt = 0.016;
+                if (dt > 0.1) dt = 0.1;
+                lastTime = timestamp;
+                ctx.fillStyle = 'rgba(10,10,20,0.35)';
+                ctx.fillRect(0, 0, W, H);
+                if (isFiring && fireworkQueue.length > 0) {
+                    const elapsedSinceStart = (timestamp - fireworkShowStartTime) / 1000;
+                    for (let i = fireworkQueue.length - 1; i >= 0; i--) {
+                        if (!fireworkQueue[i].launched && fireworkQueue[i].delay <= elapsedSinceStart) {
+                            launchFirework(fireworkQueue[i].hasText);
+                            fireworkQueue[i].launched = true;
+                        }
+                    }
+                    fireworkQueue = fireworkQueue.filter(q => !q.launched || q.delay > elapsedSinceStart - 0.1);
+                }
+                rockets.forEach(r => r.update(dt));
+                const newRockets = [];
+                for (const rocket of rockets) {
+                    if (!rocket.alive) explodeAt(rocket.x, rocket.y, rocket.hasText);
+                    else newRockets.push(rocket);
+                }
+                rockets = newRockets;
+                particles.forEach(p => p.update(dt));
+                for (let i = particles.length - 1; i >= 0; i--) {
+                    if (!particles[i].alive) particles.splice(i, 1);
+                }
+                textEffects.forEach(te => te.update(dt));
+                for (let i = textEffects.length - 1; i >= 0; i--) {
+                    if (!textEffects[i].alive) textEffects.splice(i, 1);
+                }
+                while (particles.length > 2500) particles.shift();
+                while (textEffects.length > 8) textEffects.shift();
+                rockets.forEach(r => r.draw(ctx));
+                particles.forEach(p => p.draw(ctx));
+                textEffects.forEach(te => te.draw(ctx));
+            }
+
+            lastTime = performance.now();
+            animationId = requestAnimationFrame(animate);
+
+            setTimeout(() => {
+                if (callCardVisible && !isFiring) {
+                    hideCallCard();
+                    setTimeout(startFireworkShow, 300);
+                }
+            }, 2500);
+
+            window.addEventListener('resize', () => {
+                resizeCanvas();
+                ctx.fillStyle = 'rgba(10,10,20,1)';
+                ctx.fillRect(0, 0, W, H);
+            });
+        })();
+    </script>
+</body>
+</html>
